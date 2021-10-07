@@ -55,3 +55,27 @@ def random_location():
     else:
         return {'позиция': locations[randint(0, len(locations) - 1)], 'размер': size, \
                 'ориентация': orientation}
+
+
+def get_row():
+    while True:
+        try:
+            guess = int(input("Строка: "))
+            if guess in range(1, row_size + 1):
+                return guess - 1
+            else:
+                print("\nЭто число вне океана")
+        except ValueError:
+            print("\nВведите число")
+
+
+def get_col():
+    while True:
+        try:
+            guess = int(input("Столбец: "))
+            if guess in range(1, col_size + 1):
+                return guess - 1
+            else:
+                print("\nЭто число вне океана")
+        except ValueError:
+            print("\nВведите число")
