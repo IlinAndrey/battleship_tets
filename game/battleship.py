@@ -141,3 +141,57 @@ class Ship:
             elif board_display[coords['row']][coords['col']] == '*':
                 raise RuntimeError("неточно")
         return True
+
+
+temp = 0
+while temp < num_ships:
+    ship_info = random_location()
+    if ship_info == 'None':
+        continue
+    else:
+        ship_list.append(Ship(ship_info['size'], ship_info['orientation'], ship_info['location']))
+        temp += 1
+del temp
+
+print_board(board_display)
+
+for turn in range(num_turns):
+    print("Очередь:", turn + 1, "из", num_turns)
+    print("Кораблей пропущено:", len(ship_list))
+    print()
+
+    guess_coords = {}
+    while True:
+        guess_coords['row'] = get_row()
+        guess_coords['col'] = get_col()
+        if board_display[guess_coords['row']][guess_coords['col']] == 'X' or \
+                board_display[guess_coords['row']][guess_coords['col']] == '*':
+            print("\nМимо")
+        else:
+            break
+
+    # os.system('clear')
+
+    ship_hit = False
+    for ship in ship_list:
+        if ship.contains(guess_coords):
+            print("Попал!")
+            ship_hit = True
+            board_display[guess_coords['row']][guess_coords['col']] = 'X'
+            if ship.destroyed():
+                print("Корабль уничтожен!")
+                ship_list.remove(ship)
+            break
+    if not ship_hit:
+        board_display[guess_coords['row']][guess_coords['col']] = '*'
+        print("Ты промахнулся!")
+
+    print_board(board_display)
+
+    if not ship_list:
+        break
+
+if ship_list:
+    print("Ты проиграл!")
+else:
+    print("Ты победтл!")
