@@ -18,3 +18,27 @@ def print_board(board_array):
     for r in range(row_size):
         print(str(r + 1) + " " + " ".join(str(c) for c in board_array[r]))
     print()
+
+def search_locations(size, orientation):
+    locations = []
+
+    if orientation != 'horizontal' and orientation != 'vertical':
+        raise ValueError("Ориентация должна иметь значение либо 'горизонтальная', либо 'вертикальная'.")
+
+    if orientation == 'horizontal':
+        if size <= col_size:
+            for r in range(row_size):
+                for c in range(col_size - size + 1):
+                    if 1 not in board[r][c:c + size]:
+                        locations.append({'row': r, 'col': c})
+    elif orientation == 'vertical':
+        if size <= row_size:
+            for c in range(col_size):
+                for r in range(row_size - size + 1):
+                    if 1 not in [board[i][c] for i in range(r, r + size)]:
+                        locations.append({'row': r, 'col': c})
+
+    if not locations:
+        return 'None'
+    else:
+        return locations
