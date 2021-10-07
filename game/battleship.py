@@ -1,11 +1,75 @@
 from random import randint
 import os
 
-row_size = 10  # кол-во строк
-col_size = 10  # кол-во столбцов
+
+# Ship Class
+class Ship:
+    def __init__(self, size, orientation, location):
+        self.size = size
+
+        if orientation == 'horizontal' or orientation == 'vertical':
+            self.orientation = orientation
+        else:
+            raise ValueError("Value must be 'horizontal' or 'vertical'.")
+
+        if orientation == 'horizontal':
+            if location['row'] in range(row_size):
+                self.coordinates = []
+                for index in range(size):
+                    if location['col'] + index in range(col_size):
+                        self.coordinates.append({'row': location['row'], 'col': location['col'] + index})
+                    else:
+                        raise IndexError("Column is out of range.")
+            else:
+                raise IndexError("Row is out of range.")
+        elif orientation == 'vertical':
+            if location['col'] in range(col_size):
+                self.coordinates = []
+                for index in range(size):
+                    if location['row'] + index in range(row_size):
+                        self.coordinates.append({'row': location['row'] + index, 'col': location['col']})
+                    else:
+                        raise IndexError("Row is out of range.")
+            else:
+                raise IndexError("Column is out of range.")
+
+        if self.filled():
+            print_board(board)
+            print(" ".join(str(coords) for coords in self.coordinates))
+            raise IndexError("A ship already occupies that space.")
+        else:
+            self.fillBoard()
+
+    def filled(self):
+        for coords in self.coordinates:
+            if board[coords['row']][coords['col']] == 1:
+                return True
+        return False
+
+    def fillBoard(self):
+        for coords in self.coordinates:
+            board[coords['row']][coords['col']] = 1
+
+    def contains(self, location):
+        for coords in self.coordinates:
+            if coords == location:
+                return True
+        return False
+
+    def destroyed(self):
+        for coords in self.coordinates:
+            if board_display[coords['row']][coords['col']] == 'O':
+                return False
+            elif board_display[coords['row']][coords['col']] == '*':
+                raise RuntimeError("Board display inaccurate")
+        return True
+
+
+row_size = 9  # кол-во строк
+col_size = 9  # кол-во столбцов
 num_ships = 4
-max_ship_size = 4
-min_ship_size = 1
+max_ship_size = 5
+min_ship_size = 2
 num_turns = 40
 
 ship_list = []
@@ -13,6 +77,7 @@ board = [[0] * col_size for x in range(row_size)]
 board_display = [["O"] * col_size for x in range(row_size)]
 
 
+# Functions
 def print_board(board_array):
     print("\n  " + " ".join(str(x) for x in range(1, col_size + 1)))
     for r in range(row_size):
@@ -24,7 +89,7 @@ def search_locations(size, orientation):
     locations = []
 
     if orientation != 'horizontal' and orientation != 'vertical':
-        raise ValueError("Ориентация должна иметь значение либо 'горизонтальная', либо 'вертикальная'.")
+        raise ValueError("Orientation must have a value of either 'horizontal' or 'vertical'.")
 
     if orientation == 'horizontal':
         if size <= col_size:
@@ -53,95 +118,35 @@ def random_location():
     if locations == 'None':
         return 'None'
     else:
-        return {'позиция': locations[randint(0, len(locations) - 1)], 'размер': size, \
-                'ориентация': orientation}
+        return {'location': locations[randint(0, len(locations) - 1)], 'size': size, \
+                'orientation': orientation}
 
 
 def get_row():
     while True:
         try:
-            guess = int(input("Строка: "))
+            guess = int(input("Row Guess: "))
             if guess in range(1, row_size + 1):
                 return guess - 1
             else:
-                print("\nЭто число вне океана")
+                print("\nOops, that's not even in the ocean.")
         except ValueError:
-            print("\nВведите число")
+            print("\nPlease enter a number")
 
 
 def get_col():
     while True:
         try:
-            guess = int(input("Столбец: "))
+            guess = int(input("Column Guess: "))
             if guess in range(1, col_size + 1):
                 return guess - 1
             else:
-                print("\nЭто число вне океана")
+                print("\nOops, that's not even in the ocean.")
         except ValueError:
-            print("\nВведите число")
+            print("\nPlease enter a number")
 
 
-class Ship:
-    def __init__(self, size, orientation, location):
-        self.size = size
-
-        if orientation == 'horizontal' or orientation == 'vertical':
-            self.orientation = orientation
-        else:
-            raise ValueError("значение только по горизонтали или по вертикали.")
-
-        if orientation == 'horizontal':
-            if location['row'] in range(row_size):
-                self.coordinates = []
-                for index in range(size):
-                    if location['col'] + index in range(col_size):
-                        self.coordinates.append({'row': location['row'], 'col': location['col'] + index})
-                    else:
-                        raise IndexError("Выходит из значений")
-            else:
-                raise IndexError("Выходит из значений")
-        elif orientation == 'vertical':
-            if location['col'] in range(col_size):
-                self.coordinates = []
-                for index in range(size):
-                    if location['row'] + index in range(row_size):
-                        self.coordinates.append({'row': location['row'] + index, 'col': location['col']})
-                    else:
-                        raise IndexError("Выходит из значений")
-            else:
-                raise IndexError("Выходит из значений")
-
-        if self.filled():
-            print_board(board)
-            print(" ".join(str(coords) for coords in self.coordinates))
-            raise IndexError("Корабль полностью занял пространство")
-        else:
-            self.fillBoard()
-
-    def filled(self):
-        for coords in self.coordinates:
-            if board[coords['row']][coords['col']] == 1:
-                return True
-        return False
-
-    def fillBoard(self):
-        for coords in self.coordinates:
-            board[coords['row']][coords['col']] = 1
-
-    def contains(self, location):
-        for coords in self.coordinates:
-            if coords == location:
-                return True
-        return False
-
-    def destroyed(self):
-        for coords in self.coordinates:
-            if board_display[coords['row']][coords['col']] == 'O':
-                return False
-            elif board_display[coords['row']][coords['col']] == '*':
-                raise RuntimeError("неточно")
-        return True
-
+# Create the ships
 
 temp = 0
 while temp < num_ships:
@@ -153,11 +158,13 @@ while temp < num_ships:
         temp += 1
 del temp
 
+# Play Game
+# os.system('clear')
 print_board(board_display)
 
 for turn in range(num_turns):
-    print("Очередь:", turn + 1, "из", num_turns)
-    print("Кораблей пропущено:", len(ship_list))
+    print("Turn:", turn + 1, "of", num_turns)
+    print("Ships left:", len(ship_list))
     print()
 
     guess_coords = {}
@@ -166,7 +173,7 @@ for turn in range(num_turns):
         guess_coords['col'] = get_col()
         if board_display[guess_coords['row']][guess_coords['col']] == 'X' or \
                 board_display[guess_coords['row']][guess_coords['col']] == '*':
-            print("\nМимо")
+            print("\nYou guessed that one already.")
         else:
             break
 
@@ -175,23 +182,24 @@ for turn in range(num_turns):
     ship_hit = False
     for ship in ship_list:
         if ship.contains(guess_coords):
-            print("Попал!")
+            print("Hit!")
             ship_hit = True
             board_display[guess_coords['row']][guess_coords['col']] = 'X'
             if ship.destroyed():
-                print("Корабль уничтожен!")
+                print("Ship Destroyed!")
                 ship_list.remove(ship)
             break
     if not ship_hit:
         board_display[guess_coords['row']][guess_coords['col']] = '*'
-        print("Ты промахнулся!")
+        print("You missed!")
 
     print_board(board_display)
 
     if not ship_list:
         break
 
+# End Game
 if ship_list:
-    print("Ты проиграл!")
+    print("You lose!")
 else:
-    print("Ты победтл!")
+    print("All the ships are sunk. You win!")
