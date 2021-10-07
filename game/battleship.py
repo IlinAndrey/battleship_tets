@@ -79,3 +79,65 @@ def get_col():
                 print("\nЭто число вне океана")
         except ValueError:
             print("\nВведите число")
+
+
+class Ship:
+    def __init__(self, size, orientation, location):
+        self.size = size
+
+        if orientation == 'horizontal' or orientation == 'vertical':
+            self.orientation = orientation
+        else:
+            raise ValueError("значение только по горизонтали или по вертикали.")
+
+        if orientation == 'horizontal':
+            if location['row'] in range(row_size):
+                self.coordinates = []
+                for index in range(size):
+                    if location['col'] + index in range(col_size):
+                        self.coordinates.append({'row': location['row'], 'col': location['col'] + index})
+                    else:
+                        raise IndexError("Выходит из значений")
+            else:
+                raise IndexError("Выходит из значений")
+        elif orientation == 'vertical':
+            if location['col'] in range(col_size):
+                self.coordinates = []
+                for index in range(size):
+                    if location['row'] + index in range(row_size):
+                        self.coordinates.append({'row': location['row'] + index, 'col': location['col']})
+                    else:
+                        raise IndexError("Выходит из значений")
+            else:
+                raise IndexError("Выходит из значений")
+
+        if self.filled():
+            print_board(board)
+            print(" ".join(str(coords) for coords in self.coordinates))
+            raise IndexError("Корабль полностью занял пространство")
+        else:
+            self.fillBoard()
+
+    def filled(self):
+        for coords in self.coordinates:
+            if board[coords['row']][coords['col']] == 1:
+                return True
+        return False
+
+    def fillBoard(self):
+        for coords in self.coordinates:
+            board[coords['row']][coords['col']] = 1
+
+    def contains(self, location):
+        for coords in self.coordinates:
+            if coords == location:
+                return True
+        return False
+
+    def destroyed(self):
+        for coords in self.coordinates:
+            if board_display[coords['row']][coords['col']] == 'O':
+                return False
+            elif board_display[coords['row']][coords['col']] == '*':
+                raise RuntimeError("неточно")
+        return True
